@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.env
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Android / Gradle
+**/.gradle/
+**/build/
+**/.idea/
+**/*.iml
+local.properties
+
+# .NET
+**/bin/
+**/obj/
+
+# Node
+**/node_modules/
+
+# Logs
+*.log
