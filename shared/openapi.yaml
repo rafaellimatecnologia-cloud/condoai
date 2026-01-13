@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: CondoAI API
+  version: 0.1.0
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: condoai.local
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /sync/batch:
+    post:
+      summary: Envia lote de eventos offline (idempotente por clientEventId)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncBatchRequest"
+      responses:
+        "200":
+          description: ACK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncBatchResponse"
+  /presence/today:
+    get:
+      summary: Snapshot de presença do dia
+      responses:
+        "200":
+          description: OK
+  /ai/command:
+    post:
+      summary: Chat de comandos (IA sugere ações; servidor valida e executa)
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    SyncBatchRequest:
+      type: object
+      properties:
+        deviceId: { type: string }
+        employeeId: { type: string }
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceEventIn"
+      required: [deviceId, employeeId, events]
+    AttendanceEventIn:
+      type: object
+      properties:
+        clientEventId: { type: string, format: uuid }
+        eventType: { type: string }
+        occurredAtUtc: { type: string, format: date-time }
+        lat: { type: number }
+        lon: { type: number }
+        accuracyMeters: { type: number }
+        wifiSsid: { type: string, nullable: true }
+        wifiBssid: { type: string, nullable: true }
+        qrId: { type: string, nullable: true }
+        qrVersion: { type: integer, nullable: true }
+        selfieMediaId: { type: string, format: uuid, nullable: true }
+        justification: { type: string, nullable: true }
+      required: [clientEventId, eventType, occurredAtUtc]
+    SyncBatchResponse:
+      type: object
+      properties:
+        ack:
+          type: array
+          items:
+            type: object
+            properties:
+              clientEventId: { type: string, format: uuid }
+              accepted: { type: boolean }
+              serverEventId: { type: string, format: uuid, nullable: true }
+              validationStatus: { type: string }
+              reason: { type: string, nullable: true }
+            required: [clientEventId, accepted, validationStatus]
+
